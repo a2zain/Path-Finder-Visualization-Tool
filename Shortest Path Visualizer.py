@@ -1,17 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import pygame
 from tkinter import *
 from tkinter import ttk
 from tkinter.messagebox import *
 import math
-
-
-# In[2]:
 
 
 win_len = 600
@@ -23,9 +14,6 @@ game_display.fill((0,0,0))
 pygame.display.update()
 
 
-# In[3]:
-
-
 open_list = []
 closed_list = []
 rows = 30
@@ -34,9 +22,6 @@ cell_size = win_len/rows
 black = (0,0,0)
 white = (255,255,255)
 cell_color = (171,203,255)
-
-
-# In[4]:
 
 
 class Cell:
@@ -52,11 +37,10 @@ class Cell:
         self.parent = None
         self.was_closed = False
     
-    def addNeighbours(self):
-        #ngbr is a list of tuples containing the cell 
-        #and a bool specifying if the ngbr is diagonal to the curr cell or not
+    def add_neighbours(self):
+        # ngbr is a list of tuples containing the cell 
+        # and a bool specifying if the ngbr is diagonal to the curr cell or not
         
-        # can do the diagonal thing here
         ngbr = []
         if self.y - 1 >= 0 and grid[self.x][self.y - 1].isObs == False:
             ngbr.append((grid[self.x][self.y - 1], False))
@@ -75,30 +59,24 @@ class Cell:
         if self.x-1 >= 0 and self.y-1 >= 0 and grid[self.x - 1][self.y - 1].isObs == False:
             ngbr.append((grid[self.x - 1][self.y - 1], True))   
             
-        #for nb in ngbr:
-        #    nb[0].parent = grid[self.x][self.y]
         self.neighbours = ngbr
     
     def display_cell(self, colr, border):
         pygame.draw.rect(game_display, colr, (self.x * cell_size, self.y * cell_size, cell_size, cell_size), border)
         pygame.display.update()
-        
 
 
-# In[ ]:
-
-
-#creating a 2D array
+# creating a 2D array
 grid = [0 for i in range(cols)]
 for i in range(cols):
     grid[i] = [0 for i in range(rows)]
 
-#add cells to grid
+# add cells to grid
 for c in range(cols):
     for r in range(rows):
         grid[c][r] = Cell(c, r)
         
-#displays the cells
+# displays the cells
 for c in range(cols):
     for r in range(rows):
         grid[c][r].display_cell(cell_color, 1)
@@ -107,12 +85,8 @@ start = grid[0][0]
 end = grid[cols - 1][rows-1]
 
 
-# In[ ]:
-
-
-#setting up tkinter
-
-#the function called when submit buttom is pressed
+# setting up tkinter
+# the function called when submit buttom is pressed
 def submit():
     global start
     global end
@@ -161,9 +135,6 @@ window.update()
 mainloop()
 
 
-# In[ ]:
-
-
 start.display_cell((255, 128, 0), 0)
 end.display_cell((255, 128, 0), 0)
 drag = False
@@ -201,22 +172,14 @@ while run:
             grid[x][y].color = white
             grid[x][y].display_cell(white, 0)
 
-
-# In[ ]:
-
-
-#adding the neighbours now, after the obstructions are set
-#for c in range(cols):
- #   for r in range(rows):
-  #      grid[c][r].addNeighbours()
         
-#the euclidean distance heuristics
-#this is the approx distance between current cell and end cell
+# the euclidean distance heuristics
+# this is the approx distance between current cell and end cell
 def heuristic(curr_x, curr_y):
     h = math.sqrt((curr_x - end.x)**2 + (curr_y - end.y)**2)
     return h
 
-##return a list containing the final path
+# return a list containing the final path
 def path(cell):
     p = []
     p.append(cell)
@@ -227,11 +190,11 @@ def path(cell):
     p.reverse()
     return p
 
-#at this point start and end will have been correctly initialized
+# already initialized start and end cells
 start.f = start.g + heuristic(start.x, start.y)
 open_list.append(start)
 
-#the A* search algorithm
+# the A* search algorithm
 def search(steps):
     while open_list:
         #finding the cell with the least f in open list
@@ -241,29 +204,18 @@ def search(steps):
                 indx = i
         q = open_list[indx]
 
-
-
-        q.addNeighbours()
+        q.add_neighbours()
         
-        #reached goal?
+        # reached goal
         if q.x == end.x and q.y == end.y:
             p = path(q)    
             for cell in p:
                 cell.display_cell((255, 178, 102), 3)
             root = Tk()
-            root.withdraw() #or something like this
+            root.withdraw()
             showinfo("Result", "Path found!\nThe path length is: {0:.2f}".format(q.f))
             return True
-                    
-                #print the final path if no steps required
-              #  if steps == 0:
-               #     for cell in closed_list:
-                #        cell.display_cell((255, 178, 102), 1)
-
-            #event = pygame.event.poll()    
-            #if event.type == pygame.QUIT:
-            #    break
-        
+                            
         open_list.pop(indx)
         closed_list.append(q)
 
@@ -273,19 +225,15 @@ def search(steps):
             ngbr = ngbr_tup[0]
             if ngbr.was_closed:
                 continue
-            #print(ngbr.parent.x)
-       #     if ngbr.isObs: dont need this, did it in add neighbours
-        #        continue
                 
             if ngbr not in closed_list:
-            #calculating ngbr's g
+            # calculating ngbr's g
                 g = 0
                 if ngbr_tup[1]:
                     g = q.g + math.sqrt(2)
                 else:
                     g = q.g + 1
             
-               
 
                 if ngbr.parent == None:
                     ngbr.parent =  q
@@ -293,7 +241,6 @@ def search(steps):
                 if ngbr in open_list:
                     if g < ngbr.g:
                         ngbr.g = g
-                        #cell.parent = ngbr.parent
                 else:
                     ngbr.g = g
                     open_list.append(ngbr) 
@@ -315,81 +262,13 @@ def search(steps):
                     continue
                 cell.display_cell((144, 66, 245), 3)
     
-    return False
-            #displaying the ngbrs
-           # if steps == 1 and not ngbr.color == (255, 178, 102):
-            #    ngbr.display_cell((102, 0, 0), 1)
-         
-            
-            
-                
-           # for cell in closed_list:
-            #    if ngbr.x == cell.x and ngbr.y == cell.y and cell.f < ngbr.f:
-             #       skip = True
-              #      break
-            #if skip:
-             #   continue
-            #else:
-                
-        
-       # if not q == start:
-        #    grid[q.x][q.y].color = (255, 178, 102)
-         #   if steps == 0:
-          #      grid[q.x][q.y].display_cell((255, 178, 102), 1)
-        
-            
-#search(var)            
-
-
-# In[ ]:
-
-
-#def main():
-    #the user selects the starting point
-    #showinfo("Starting Point", "Select starting point")
-    #for event in pygame.event.get():
-     #   if(event.type == pygame.MOUSEBUTTONDOWN):
-      #      pos = pygame.mouse.get_pos()
-       #     start.x = pos[0]//cell_size
-        #    start.y = pos[1]//cell_size
-         #   start.color = (255, 128, 0)
-          #  grid[start.x][start.y] = start
-           # start.display_cell()
-    
-    #the user selects the end point
-   # showinfo("End Point", "Select end point")
-    #for event in pygame.event.get():
-     #   if(event.type == pygame.MOUSEBUTTONDOWN):
-      #      pos = pygame.mouse.get_pos()
-       #     end.x = pos[0]//cell_size
-        #    end.y = pos[1]//cell_size
-         #   end.color = (255, 128, 0)
-          #  grid[end.x][end.y] = end
-           # end.display_cell()
-    
-    
-            
-   # response = askquestion("Steps", "Do you want to see all the steps of the algorithm?")
-   # search(var)
-   # pygame.display.update()
-    
-
-
-# In[ ]:
-
-
-res = search(var.get())
-
-if not res:
     root = Tk()
     root.withdraw()
     showinfo("Path not found", "No path was found!")
-#run = True
-#while run:
-#    for event in pygame.event.get():
-#        if event.type == pygame.QUIT:
-#            run = False
-#            break 
+    return False
+
+
+res = search(var.get())
 
 while True:
     event = pygame.event.poll()    
@@ -397,11 +276,3 @@ while True:
         break
 
 pygame.quit()
-
-
-
-# In[ ]:
-
-
-
-
